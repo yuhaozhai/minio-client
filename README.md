@@ -1,10 +1,10 @@
-# @cjsz/minio-client
+# @cjsz/minio-client :chicken:
 
 
-vue2版本。后续会出vue3版本。
+:bulb: vue2版本。后续会出vue3版本。:mega::mega::mega::mega:
 
 
-npm build && npm publish --access public 发布版本
+:bulb: npm build && npm publish --access public 发布版本
 
 
-test文件可删除，更新.
+:bulb: test文件可删除，更新.
