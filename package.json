@@ -1,6 +1,6 @@
 {
-  "name": "minio-client",
-  "version": "1.0.0",
+  "name": "@cjsz/minio-client",
+  "version": "1.0.2",
   "description": "长江数字MinIO管理器",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

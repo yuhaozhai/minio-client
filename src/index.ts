@@ -85,6 +85,7 @@ export default class MinIOClient {
          static bigFileUpload = (uploadPath: any, file: any, callBack?: (arg0: number) => any, randomName?: any) => {
             let config: any = getMinIoConfig(key);
             let option = {
+                // 正式环境
                 endPoint: config.url.substring(8,config.url.length),
                 port:443,
                 useSSL: true,
@@ -92,6 +93,7 @@ export default class MinIOClient {
                 secretKey: config.accessKeySecret
             }
             if(config.url.indexOf('https') === -1){
+                // 测试环境
                 option = {
                     endPoint: '192.168.196.50',
                      port:9000,
