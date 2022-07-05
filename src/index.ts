@@ -1,9 +1,11 @@
-import getMinIoConfig from "./util";
+import {getMinIoConfig} from "./util";
 
 var Minio = require('minio');
 import {v4 as uuidv4} from 'uuid';
 import moment from "moment";
-const key  = 'cjyd012345678901'
+
+let key  = 'cjyd012345678901'
+
 const bucketName = getMinIoConfig(key).bucket
 let xhrList: XMLHttpRequest[] = []
 
@@ -93,6 +95,7 @@ export default class MinIOClient {
                 secretKey: config.accessKeySecret
             }
             if(config.url.indexOf('https') === -1){
+                let endpoint = config.url.substring(0,config.url.lastIndexOf(':')).replace('http://','')
                 // 测试环境
                 option = {
                     endPoint: '192.168.196.50',

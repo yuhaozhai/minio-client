@@ -8,3 +8,6 @@
 
 
 :bulb: test文件可删除，更新.
+
+
+:bulb:后续key值取session，项目记得在session存加解密key

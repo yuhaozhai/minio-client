@@ -1,6 +1,6 @@
 {
   "name": "@cjsz/minio-client",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "长江数字MinIO管理器",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,7 @@
     "build": "npx tsc -p ."
   },
   "keywords": ["minio","cjsz"],
-  "author": "",
+  "author": "zyh619",
   "license": "ISC",
   "dependencies": {
     "typescript": "^4.7.4",

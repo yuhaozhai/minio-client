@@ -1,4 +1,3 @@
-// const {decrypt,encrypt} = require("../dist/src/index").default
+const {imgSrcTurn} = require("../dist/util")
 
-// console.log(encrypt("GASGAJSDJANAS",'cjyd012345678901'));
-// console.log(decrypt("nKESb5D3GWSah5KUIhlaVQ==",'cjyd012345678901'));
+console.log(imgSrcTurn('/szyun/121212.png'));
