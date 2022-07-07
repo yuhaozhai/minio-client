@@ -1,13 +1,14 @@
 import CryptoJS from "crypto-js";
-let key  = 'cjyd012345678901'
-enum GlobalConstant {
+
+
+export enum GlobalConstant {
     USER_KEY = '_USERINFO',
     TOKEN = 'token',
-    MENU = '_ALLMENU',
-    tokenArray = 'tokenArray',
-    ctxPath = "/cjyd-manage",  
     imgPath = "/szyun",
+    sukey = 'miniowigetgkey'  
 }
+
+let key  = sessionStorage.getItem(GlobalConstant.sukey) as string
 
 
 export function decrypt(value:string,key:string){

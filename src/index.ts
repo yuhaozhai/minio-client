@@ -1,11 +1,12 @@
-import {getMinIoConfig} from "./util";
+import {getMinIoConfig, GlobalConstant} from "./util";
 
-var Minio = require('minio');
 import {v4 as uuidv4} from 'uuid';
 import moment from "moment";
+// vite+minio目前不兼容，使用awos进行minio存储
+import * as AWOS from 'awos-js'
 
-let key  = 'cjyd012345678901'
-
+let key  = sessionStorage.getItem(GlobalConstant.sukey) as string
+// zfg4se52ty84uu16
 const bucketName = getMinIoConfig(key).bucket
 let xhrList: XMLHttpRequest[] = []
 
@@ -81,83 +82,62 @@ export default class MinIOClient {
             };
         });
     }
-        /**
+  /**
      * 分片上传
      */
-         static bigFileUpload = (uploadPath: any, file: any, callBack?: (arg0: number) => any, randomName?: any) => {
-            let config: any = getMinIoConfig(key);
-            let option = {
-                // 正式环境
-                endPoint: config.url.substring(8,config.url.length),
-                port:443,
-                useSSL: true,
-                accessKey: config.accessKeyId,
-                secretKey: config.accessKeySecret
-            }
-            if(config.url.indexOf('https') === -1){
-                let endpoint = config.url.substring(0,config.url.lastIndexOf(':')).replace('http://','')
-                // 测试环境
-                option = {
-                    endPoint: '192.168.196.50',
-                     port:9000,
-                    useSSL: false,
-                    accessKey: config.accessKeyId,
-                    secretKey: config.accessKeySecret
-                }
-            }
-            const minioClient = new Minio.Client(option);
-            const names = file.name.split('.');
-            let fileName = `${uploadPath}${file.name}`;
-            if (randomName) {
-                // uuid生成文件名称
-                fileName = `${uploadPath}${uuidv4().replace(/-/g, '')}.${names[names.length - 1]}`;
-            }
-            //判断储存桶是否存在
-            return new Promise((resolve, reject) => {
-                minioClient.bucketExists(bucketName, function (err:any) {
-                    if (err) {
-                        if (err.code == "NoSuchBucket")
-                            return console.log("bucket不存在");
-                    }
-                    minioClient.presignedPutObject(bucketName, fileName, 24 * 60 * 60, function (err:any, presignedUrl:string) {
-                        let xhr = new XMLHttpRequest();
-                        xhr.open("PUT", presignedUrl, true);
-                        xhr.withCredentials = false;
-                        const token = localStorage.getItem("token");
-                        if (token) {
-                            xhr.setRequestHeader(
-                                "Authorization",
-                                "Bearer " + localStorage.getItem("token")
-                            );
-                        }
-                        xhr.setRequestHeader(
-                            "x-amz-date",
-                            moment()
-                                .utc()
-                                .format("YYYYMMDDTHHmmss") + "Z"
-                        );
-                        xhr.upload.addEventListener("progress", event => {
-                            if (event.lengthComputable) {
-                                let complete = (event.loaded / event.total * 100 | 0);
-                                callBack ? callBack(complete) : '';
-                                if (complete === 100) {
-                                    resolve(presignedUrl.substring(presignedUrl.indexOf('/szyun'), presignedUrl.indexOf('?X-Amz-Algorithm')));
-                                }
-                            }
-                        });
-                        xhr.send(file);
-                        xhrList.push(xhr);
-                    });
-                });
-            });
-    
-        };
-// 取消所有请求
-        static abortAllXhr() {
-            xhrList.map(item => {
-                item.abort();
-            });
-            xhrList = [];
+   static bigFileUpload = (uploadPath: any, file:  any, callBack?: (arg0: number) => any, randomName?: any,substring='/resourcelib') => {
+    let config: any = getMinIoConfig(key);
+    const minioClient = new AWOS.Client({
+        type: 'aws',
+        awsOptions: {
+            accessKeyId: config.accessKeyId,
+            secretAccessKey: config.accessKeySecret,
+            bucket: bucketName,
+            // when use aws, endpoint is unnecessary and region must be set
+            region: "Fus-east-1",
+            endpoint: config.url,
+            // when use minio, S3ForcePathStyle must be set true
+            s3ForcePathStyle: true,
+            SSL: config.url.indexOf('https') !== -1
         }
+    })
+    const names = file.name.split('.');
+    let fileName = `${uploadPath}${file.name}`;
+    if (randomName) {
+        // uuid生成文件名称
+        fileName = `${uploadPath}${uuidv4().replace(/-/g, '')}.${names[names.length - 1]}`;
+    }
+    return new Promise(async (resolve, reject) => {
+        minioClient.signatureUrl(fileName,{method:'PUT',expires:86400}).then((presignedUrl:any) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("PUT", presignedUrl, true);
+            xhr.withCredentials = false;
+            xhr.setRequestHeader(
+                "x-amz-date",
+                moment()
+                    .utc()
+                    .format("YYYYMMDDTHHmmss") + "Z"
+            );
+            xhr.upload.addEventListener("progress", event => {
+                if (event.lengthComputable) {
+                    let complete = (event.loaded / event.total * 100 | 0);
+                    callBack ? callBack(complete) : '';
+                    if (complete === 100) {
+                        resolve(presignedUrl.substring(presignedUrl.indexOf(substring), presignedUrl.indexOf('?X-Amz-Algorithm')));
+                    }
+                }
+            });
+            xhr.send(file);
+            xhrList.push(xhr);
+        })
+    });
+};
+
+static abortAllXhr() {
+    xhrList.map(item => {
+        item.abort();
+    });
+    xhrList = [];
+}
 }
 
